@@ -13,6 +13,7 @@ import os
 from datetime import datetime
 import numpy as np
 import statistics
+from spy_data import spy
 
 HEADERS = {
     'a': 'date',
@@ -209,15 +210,6 @@ def get_spy():
     return spy_range_data
 
 
-timeframe = 10
-download_mclellan_website_data()
-clean_excel_data()
-d, ad, sma_ad = get_advance_decline_data(timeframe=timeframe)
-d_, up_v_percent, sma_v = get_volume_data()
-spy_data = get_spy()
-plot_mcclellan_index_and_reversal(spy_data)
-
-
 def plot_ad():
     spy_data_dates = [datetime.strptime(i, "%Y-%m-%d") for i in list(spy_data.keys())]
 
@@ -285,6 +277,13 @@ def clean_up():
             os.remove(f'C:/Users/joema/Downloads/{f}')
 
 
+timeframe = 10
+download_mclellan_website_data()
+clean_excel_data()
+d, ad, sma_ad = get_advance_decline_data(timeframe=timeframe)
+d_, up_v_percent, sma_v = get_volume_data()
+spy_data = get_spy()
+plot_mcclellan_index_and_reversal(spy_data)
 plot_ad()
 plot_vol()
 clean_up()
