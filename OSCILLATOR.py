@@ -13,7 +13,6 @@ import os
 from datetime import datetime
 import numpy as np
 import statistics
-from spy_data import spy
 
 HEADERS = {
     'a': 'date',
