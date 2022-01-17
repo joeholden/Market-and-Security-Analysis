@@ -4,12 +4,11 @@ import os
 # noinspection SpellCheckingInspection
 portfolio = {
     'AAPL': 46.78,
-    'ADBE': 2,
     'AMAT': 16.031,
     'AMD': 85,
     'AMZN': 1.076,
-    'F': 205.694,
-    'FB': 3,
+    'F': 212.694,
+    'FB': 6,
     'GS': 1,
     'GOOGL': 2,
     'HON': 2.018,
@@ -21,9 +20,9 @@ portfolio = {
     'NVDA': 15.01,
     'PYPL': 2,
     'SBUX': 5,
-    'QCOM': 4
+    'QCOM': 7
 }
-CASH = 2645
+CASH = 4105
 
 # portfolio = {
 #     'AMD': 100,
