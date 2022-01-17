@@ -1,7 +1,7 @@
 # Portfolio-analysis
 GUI for portfolio analysis, overall market sentiment and trading direction, individual security analysis
 
-Market Sentiment:
+Market Sentiment:\n
 Breadth Indicators: Advance Decline Line (NYSE) with Oscillators, Volume Oscillator (NYSE), McClellan Summation Index and Oscillator
 CBOE Put/Call Ratios (Total and Equity-Restricted)
 
