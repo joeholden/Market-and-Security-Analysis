@@ -1,18 +1,35 @@
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from openpyxl import load_workbook
 import datetime
+from datetime import date, timedelta
+import matplotlib.pyplot as plt
+import matplotlib
 
 """
 This script scrapes CBOE website for total and equity put/call ratios and updates a central excel file.
 This file will be used to create a put call oscillator plot
 """
 
+get_historical = False
+get_today = False
+plot_figure = True
+# 'epc' or 'tpc' | equity or total
+which_option_to_plot = 'epc'
+
+timeframe_to_plot_sma = 10
+date_axis_plotting_interval = 15
+# If you change get_historical to True, change start and end dates. Its non-inclusive at the end date
+start_date = date(2021, 11, 12)
+end_date = date(2022, 1, 16)
+
 
 def download_put_call():
-    url = 'https://www.cboe.com/us/options/market_statistics/daily/'
+    # url = 'https://www.cboe.com/us/options/market_statistics/daily/'
+    url = f'https://www.cboe.com/us/options/market_statistics/daily/?dt={single_date}'
     s = Service(ChromeDriverManager().install())
     op = webdriver.ChromeOptions()
     op.headless = True
@@ -38,13 +55,62 @@ def update_excel_sheet():
             first_empty_row = row
             break
 
-    today = datetime.date.today()
+    # today = datetime.date.today()
     total_pc, equity_pc = download_put_call()
 
-    ws[f'A{first_empty_row}'], ws[f'B{first_empty_row}'], ws[f'C{first_empty_row}'] = today, total_pc, equity_pc
+    ws[f'A{first_empty_row}'], ws[f'B{first_empty_row}'], ws[f'C{first_empty_row}'] = single_date, total_pc, equity_pc
     wb.save('C:/Users/joema/PycharmProjects/stocks/excel files/put_call.xlsx')
 
 
-# Monday is 0, Sunday is 6
-if datetime.date.today().weekday() in [0, 1, 2, 3, 4, 5, 6]:
-    update_excel_sheet()
+def date_range(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+
+def plot(timeframe, option_type):
+    data = pd.read_excel('excel files/put_call.xlsx', engine='openpyxl')
+    dates = pd.to_datetime(data['Day'])
+    tpc = data['Total Put/Call']
+    epc = data['Equity Put/Call']
+    tpc_rolling = tpc.rolling(window=timeframe).mean()
+    epc_rolling = epc.rolling(window=timeframe).mean()
+    fig, ax = plt.subplots(figsize=(11, 6))
+
+    if option_type == 'tpc':
+        ax.plot(dates, tpc, label='Total Put/Call', color='black')
+        ax.plot(dates, tpc_rolling, label=f'{timeframe}-Day Moving Average', color='purple')
+        plt.title('CBOE Total Put/Call Ratio\n', fontsize=21)
+        plt.figtext(0.335, 0.89, f'Current Put/Call Ratio: {list(tpc)[-1]}', fontsize=21, color='purple')
+
+    elif option_type == 'epc':
+        ax.plot(dates, epc, label='Equity Put/Call', color='black')
+        ax.plot(dates, epc_rolling, label=f'{timeframe}-Day Moving Average', color='purple')
+        plt.title('Equity Put/Call Ratio\n', fontsize=21)
+        plt.figtext(0.335, 0.89, f'Current Put/Call Ratio: {list(epc)[-1]}', fontsize=21, color='purple')
+
+    ax.xaxis.set_major_locator(matplotlib.dates.DayLocator(interval=date_axis_plotting_interval))
+    plt.legend(facecolor='#bebebe', framealpha=0, fontsize=15)
+    ax.set_facecolor('#bebebe')
+    plt.tight_layout()
+    plt.savefig(f'plots/{option_type}_put_call.png')
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+if get_historical:
+    for single_date in date_range(start_date, end_date):
+        # Monday is 0, Sunday is 6
+        if single_date.weekday() in [0, 1, 2, 3, 4]:
+            update_excel_sheet()
+elif get_today:
+    single_date = datetime.date.today()
+    if single_date.weekday() in [0, 1, 2, 3, 4]:
+        update_excel_sheet()
+elif get_today and plot_figure:
+    single_date = datetime.date.today()
+    if single_date.weekday() in [0, 1, 2, 3, 4]:
+        update_excel_sheet()
+    plot(timeframe_to_plot_sma, which_option_to_plot)
+else:
+    plot(timeframe_to_plot_sma, which_option_to_plot)
