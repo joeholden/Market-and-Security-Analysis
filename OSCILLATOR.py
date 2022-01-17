@@ -153,7 +153,7 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
     spy_data = benchmark_index
     spy_data_dates = [datetime.strptime(i, "%Y-%m-%d") for i in list(spy_data.keys())]
 
-    fig, ax = plt.subplots(2, figsize=(13, 10), gridspec_kw={'height_ratios': [3.5, 1]})
+    fig, ax = plt.subplots(2, figsize=(13, 10), gridspec_kw={'height_ratios': [3, 1]})
 
     ax0 = ax[0]
     ax1 = ax0.twinx()
@@ -172,18 +172,20 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
 
     plt.title(f'McClellan Summation Index vs. SPY\n', fontsize=20)
 
-    ax2.plot(data["date"], oscillator_to_zero, color='purple', label='A-D to Turn McClellan Summation Index')
-    ax2.legend(fontsize=12)
+    ax2.bar(data["date"], oscillator_to_zero, color='purple')
+    ax2.set_facecolor('#bebebe')
+    ax2.set_title('A-D to Turn McClellan Summation Index', size=18)
+    plt.figtext(0.91, 0.115, 'Overbought', color='red')
+    plt.figtext(0.91, 0.25, 'Oversold', color='green')
     plt.sca(ax2)
 
     overbought_oversold_points = []
-
+    plt.axhline(y=4000, linestyle='--', color='purple')
+    plt.axhline(y=-4000, linestyle='--', color='purple')
     for i, v in enumerate(oscillator_to_zero):
-        if v > 3800:
-            plt.axvline(x=data['date'][i], color='black')
+        if v > 4000:
             overbought_oversold_points.append((i, v))
-        if v < -3800:
-            plt.axvline(x=data['date'][i], color='black')
+        if v < -4000:
             overbought_oversold_points.append((i, v))
 
     plt.sca(ax1)
@@ -193,7 +195,7 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
     current_oscillator_to_zero = round(list(oscillator_to_zero)[-1], 0)
     plt.figtext(0.34, 0.89, f'Current A-D to Turn Index: {current_oscillator_to_zero}', color='purple', fontsize=20)
 
-    plt.show()
+    plt.savefig('plots/mcclellan.png')
 
 
 def get_spy():
@@ -213,7 +215,7 @@ def get_spy():
 def plot_ad():
     spy_data_dates = [datetime.strptime(i, "%Y-%m-%d") for i in list(spy_data.keys())]
 
-    fig, ax1 = plt.subplots(figsize=(11, 6))
+    fig, ax1 = plt.subplots(figsize=(18, 9))
 
     ax1.plot(d, sma_ad, color='purple', label='Oscillator')
     ax1.scatter(d, sma_ad, color='purple', s=7)
@@ -227,21 +229,23 @@ def plot_ad():
     # ax2.spines['right'].set_color('blue')
     ax1.tick_params(axis='y', labelcolor='purple')
     ax2.tick_params(axis='y', labelcolor='blue')
+    ax1.tick_params(axis='both', which='major', labelsize=17)
+    ax2.tick_params(axis='both', which='major', labelsize=17)
 
     h1, l1 = ax1.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
-    ax1.legend(h1 + h2, l1 + l2, loc=0, facecolor='#bebebe', framealpha=0)
+    ax1.legend(h1 + h2, l1 + l2, facecolor='#bebebe', framealpha=0, bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=14)
     ax1.set_facecolor('#bebebe')
 
-    plt.title(f'Advance Decline Oscillator ({timeframe}-Day) vs. SPY', fontsize=20)
-
-    plt.show()
+    plt.title(f'Advance Decline Oscillator ({timeframe}-Day) vs. SPY', fontsize=25)
+    plt.tight_layout()
+    plt.savefig('plots/ad.png')
 
 
 def plot_vol():
     spy_data_dates = [datetime.strptime(i, "%Y-%m-%d") for i in list(spy_data.keys())]
 
-    fig, ax1 = plt.subplots(figsize=(11, 6))
+    fig, ax1 = plt.subplots(figsize=(18, 9))
 
     ax1.plot(d, sma_v, color='purple', label='Oscillator')
     ax1.scatter(d, sma_v, color='purple', s=7)
@@ -258,16 +262,19 @@ def plot_vol():
 
     ax1.tick_params(axis='y', labelcolor='purple')
     ax2.tick_params(axis='y', labelcolor='blue')
-    ax1.set_ylabel('Percent Up Volume NYSE', color='purple', fontsize=16)
-    ax2.set_ylabel('SPY Price', color='blue', fontsize=16, rotation=270, labelpad=15)
+    ax1.set_ylabel('Percent Up Volume NYSE', color='purple', fontsize=20)
+    ax2.set_ylabel('SPY Price', color='blue', fontsize=20, rotation=270, labelpad=15)
+    ax1.tick_params(axis='both', which='major', labelsize=17)
+    ax2.tick_params(axis='both', which='major', labelsize=17)
 
     h1, l1 = ax1.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
-    ax1.legend(h1 + h2, l1 + l2, loc=0, facecolor='#bebebe', framealpha=0)
+    ax1.legend(h1 + h2, l1 + l2, facecolor='#bebebe', framealpha=0, bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=14)
     ax1.set_facecolor('#bebebe')
 
-    plt.title(f'Volume Oscillator (30-Day) vs. SPY', fontsize=20)
-    plt.show()
+    plt.title(f'Volume Oscillator (30-Day) vs. SPY', fontsize=25)
+    plt.tight_layout()
+    plt.savefig('plots/vol.png')
 
 
 def clean_up():
@@ -283,7 +290,7 @@ clean_excel_data()
 d, ad, sma_ad = get_advance_decline_data(timeframe=timeframe)
 d_, up_v_percent, sma_v = get_volume_data()
 spy_data = get_spy()
-plot_mcclellan_index_and_reversal(spy_data)
+plot_mcclellan_index_and_reversal(spy)
 plot_ad()
 plot_vol()
 clean_up()
