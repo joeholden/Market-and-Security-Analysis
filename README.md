@@ -1,4 +1,4 @@
-# Portfolio-analysis
+# Market and Security Analysis
 GUI for portfolio analysis, overall market sentiment and trading direction, individual security analysis
 
 (Market Sentiment)  
