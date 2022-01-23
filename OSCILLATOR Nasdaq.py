@@ -15,6 +15,8 @@ import numpy as np
 import statistics
 from spy_data import spy
 
+SPY_OR_QQQ = 'QQQ'
+
 HEADERS = {
     'a': 'date',
     'b': 'NYSE Advancing Issues',
@@ -160,7 +162,7 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
     ax2 = ax[1]
 
     ax0.plot(d, mcclellan_summation_index, color='purple', label='McClellan Summation Index')
-    ax1.plot(spy_data_dates, spy_data.values(), color='blue', label='SPY')
+    ax1.plot(spy_data_dates, spy_data.values(), color='blue', label=f'{SPY_OR_QQQ}')
 
     ax0.tick_params(axis='y', labelcolor='purple')
     ax1.tick_params(axis='y', labelcolor='blue')
@@ -170,7 +172,7 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
     ax0.legend(h1 + h2, l1 + l2, loc=0, facecolor='#bebebe', framealpha=0, fontsize=12)
     ax0.set_facecolor('#bebebe')
 
-    plt.title(f'McClellan Summation Index vs. SPY\n', fontsize=20)
+    plt.title(f'McClellan Summation Index vs. {SPY_OR_QQQ}\n', fontsize=20)
 
     ax2.bar(data["date"], oscillator_to_zero, color='purple')
     ax2.set_facecolor('#bebebe')
@@ -199,7 +201,7 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
 
 
 def get_spy():
-    response = requests.get(f'https://financialmodelingprep.com/api/v3/historical-price-full/SPY?serietype=line'
+    response = requests.get(f'https://financialmodelingprep.com/api/v3/historical-price-full/{SPY_OR_QQQ}?serietype=line'
                             f'&apikey={os.environ["APIKEY"]}')
     data = response.json()['historical']
 
@@ -222,7 +224,7 @@ def plot_ad():
     ax1.plot(d, [0] * len(d), '--', color='white')
 
     ax2 = plt.twinx(ax1)
-    ax2.plot(spy_data_dates, spy_data.values(), color='blue', label='SPY')
+    ax2.plot(spy_data_dates, spy_data.values(), color='blue', label=f'{SPY_OR_QQQ}')
     ax2.scatter(spy_data_dates, spy_data.values(), color='blue', s=7)
 
     # ax2.spines['left'].set_color('purple')
@@ -237,7 +239,7 @@ def plot_ad():
     ax1.legend(h1 + h2, l1 + l2, facecolor='#bebebe', framealpha=0, bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=14)
     ax1.set_facecolor('#bebebe')
 
-    plt.title(f'Advance Decline Oscillator ({timeframe}-Day) vs. SPY', fontsize=25)
+    plt.title(f'Advance Decline Oscillator ({timeframe}-Day) vs. {SPY_OR_QQQ}', fontsize=25)
     plt.tight_layout()
     plt.savefig(f'plots/{timeframe}ad.png')
 
@@ -257,7 +259,7 @@ def plot_vol():
     ax1.set_ylim(0.95 * min_vol, 1.05 * max_vol)
 
     ax2 = plt.twinx(ax1)
-    ax2.plot(spy_data_dates, spy_data.values(), color='blue', label='SPY')
+    ax2.plot(spy_data_dates, spy_data.values(), color='blue', label=f'{SPY_OR_QQQ}')
     ax2.scatter(spy_data_dates, spy_data.values(), color='blue', s=7)
 
     ax1.tick_params(axis='y', labelcolor='purple')
@@ -272,7 +274,7 @@ def plot_vol():
     ax1.legend(h1 + h2, l1 + l2, facecolor='#bebebe', framealpha=0, bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=14)
     ax1.set_facecolor('#bebebe')
 
-    plt.title(f'Volume Oscillator (30-Day) vs. SPY', fontsize=25)
+    plt.title(f'Volume Oscillator (30-Day) vs. {SPY_OR_QQQ}', fontsize=25)
     plt.tight_layout()
     plt.savefig('plots/vol.png')
 
