@@ -20,7 +20,7 @@ def regex_parse_transaction(transaction):
     for transaction_type, pattern in patterns.items():
         match_object = re.match(pattern, transaction['DESCRIPTION'])
         if match_object:
-            print(match_object.group(0))
+            return match_object.group(0)
 
 
 full_data_frame = pd.DataFrame()
@@ -34,4 +34,6 @@ for n in range(1, len(os.listdir(TRANSACTIONS_DIRECTORY)) + 1):
 # Gets all transactions:
 for row in range(0, full_data_frame.shape[0]):
     trans = full_data_frame.loc[row, :]
-    regex_parse_transaction(transaction=trans)
+    trans_description = regex_parse_transaction(transaction=trans)
+    if trans_description:
+        print(trans_description)

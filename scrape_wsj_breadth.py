@@ -52,7 +52,7 @@ def scrape_wsj_market_breadth():
             int(nasdaq_new_highs.text.replace(',', '')), int(nasdaq_new_lows.text.replace(',', '')))
 
 
-print(scrape_wsj_market_breadth())
+# print(scrape_wsj_market_breadth())
 
 
 def update_excel_sheet():
@@ -60,7 +60,7 @@ def update_excel_sheet():
                'NYSE New Lows', 'NASDAQ Advancers', 'NASDAQ Decliners', 'NASDAQ Adv. Volume', 'NASDAQ Dec. Volume',
                'NASDAQ New Highs', 'NASDAQ New Lows']
 
-    wb = load_workbook('C:/Users/joema/PycharmProjects/stocks/excel files/WSJ Breadth.xlsx')
+    wb = load_workbook('C:/Users/joema/PycharmProjects/Market-and-Security-Analysis/excel files/WSJ Breadth.xlsx')
     ws = wb.active
 
     # Get First Empty Row to Append @
@@ -78,7 +78,10 @@ def update_excel_sheet():
     ws[f'H{first_empty_row}'], ws[f'I{first_empty_row}'], ws[f'J{first_empty_row}'], \
     ws[f'K{first_empty_row}'], ws[f'L{first_empty_row}'], ws[f'M{first_empty_row}'] = data
 
-    wb.save('C:/Users/joema/PycharmProjects/stocks/excel files/WSJ Breadth.xlsx')
+    wb.save('C:/Users/joema/PycharmProjects/Market-and-Security-Analysis/excel files/WSJ Breadth.xlsx')
+
+
+update_excel_sheet()
 
 
 def plot():

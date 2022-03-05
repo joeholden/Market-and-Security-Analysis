@@ -12,8 +12,7 @@ import requests
 import os
 from datetime import datetime
 import numpy as np
-import statistics
-from spy_data import spy
+
 
 HEADERS = {
     'a': 'date',
@@ -48,10 +47,12 @@ def download_mclellan_website_data():
     s = Service(ChromeDriverManager().install())
     op = webdriver.ChromeOptions()
     # op.add_argument('--headless')
-    # op.add_argument('--disable-gpu')
+    op.add_argument('--disable-gpu')
     driver = webdriver.Chrome(service=s, options=op)
 
     driver.get(url)
+    # driver.execute_script("window.scrollTo(0, 500)")
+    # driver.get_screenshot_as_file("screenshot.png")
     download_link = driver.find_element(by=By.XPATH, value='//*[@id="data_table"]/a[1]/img')
     download_link.click()
 
@@ -136,6 +137,19 @@ def get_volume_data():
     return date, percent_up_volume, sma30
 
 
+def get_spy():
+    response = requests.get(f'https://financialmodelingprep.com/api/v3/historical-price-full/SPY?serietype=line'
+                            f'&apikey={os.environ["FMP_APIKEY"]}')
+    data = response.json()['historical']
+
+    spy_range_data = {}
+    for branch in data:
+        date = branch['date']
+        if start_date <= datetime.strptime(date, "%Y-%m-%d") <= end_date:
+            spy_range_data[f'{branch["date"]}'] = branch['close']
+    return spy_range_data
+
+
 def plot_mcclellan_index_and_reversal(benchmark_index):
     """
     Ratio-Adjusted Net Advances (RANA): (Advances - Declines)/(Advances + Declines)
@@ -150,8 +164,8 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
     mcclellan_oscillator = data['McC A-D Osc']
     oscillator_to_zero = data['Osc to zero tomorrow']
 
-    spy_data = benchmark_index
-    spy_data_dates = [datetime.strptime(i, "%Y-%m-%d") for i in list(spy_data.keys())]
+    spy_data_ = benchmark_index
+    spy_data_dates = [datetime.strptime(i, "%Y-%m-%d") for i in list(spy_data_.keys())]
 
     fig, ax = plt.subplots(2, figsize=(13, 10), gridspec_kw={'height_ratios': [3, 1]})
 
@@ -160,7 +174,7 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
     ax2 = ax[1]
 
     ax0.plot(d, mcclellan_summation_index, color='purple', label='McClellan Summation Index')
-    ax1.plot(spy_data_dates, spy_data.values(), color='blue', label='SPY')
+    ax1.plot(spy_data_dates, spy_data_.values(), color='blue', label='SPY')
 
     ax0.tick_params(axis='y', labelcolor='purple')
     ax1.tick_params(axis='y', labelcolor='blue')
@@ -189,27 +203,16 @@ def plot_mcclellan_index_and_reversal(benchmark_index):
             overbought_oversold_points.append((i, v))
 
     plt.sca(ax1)
-    ax1.scatter([data['date'][i] for (i, v) in overbought_oversold_points],
-                [spy_data[str(data['date'][i]).split(" ")[0]] for (i, v) in overbought_oversold_points], color='black')
+    try:
+        ax1.scatter([data['date'][i] for (i, v) in overbought_oversold_points],
+                    [spy_data[str(data['date'][i]).split(" ")[0]] for (i, v) in overbought_oversold_points], color='black')
+    except KeyError as e:
+        print(e)
 
     current_oscillator_to_zero = round(list(oscillator_to_zero)[-1], 0)
     plt.figtext(0.34, 0.89, f'Current A-D to Turn Index: {current_oscillator_to_zero}', color='purple', fontsize=20)
 
     plt.savefig('plots/mcclellan.png')
-
-
-def get_spy():
-    response = requests.get(f'https://financialmodelingprep.com/api/v3/historical-price-full/SPY?serietype=line'
-                            f'&apikey={os.environ["APIKEY"]}')
-    data = response.json()['historical']
-
-    spy_range_data = {}
-    for branch in data:
-        date = branch['date']
-        if start_date <= datetime.strptime(date, "%Y-%m-%d") <= end_date:
-            spy_range_data[f'{branch["date"]}'] = branch['close']
-
-    return spy_range_data
 
 
 def plot_ad():
@@ -290,7 +293,10 @@ clean_excel_data()
 d, ad, sma_ad = get_advance_decline_data(timeframe=timeframe)
 d_, up_v_percent, sma_v = get_volume_data()
 spy_data = get_spy()
-plot_mcclellan_index_and_reversal(spy)
+plot_mcclellan_index_and_reversal(spy_data)
 plot_ad()
 plot_vol()
+timeframe = 30
+d, ad, sma_ad = get_advance_decline_data(timeframe=timeframe)
+plot_ad()
 clean_up()

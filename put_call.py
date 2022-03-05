@@ -25,8 +25,8 @@ which_option_to_plot = 'tpc'
 timeframe_to_plot_sma = 10
 date_axis_plotting_interval = 15
 # If you change get_historical to True, change start and end dates. Its non-inclusive at the end date
-start_date = date(2022, 1, 20)
-end_date = date(2022, 1, 21)
+start_date = date(2022, 1, 21)
+end_date = date(2022, 2, 2)
 
 
 def download_put_call():
@@ -47,7 +47,7 @@ def download_put_call():
 
 def update_excel_sheet():
     headers = ['Day', 'Total Put/Call', 'Equity Put/Call']
-    wb = load_workbook('C:/Users/joema/PycharmProjects/stocks/excel files/put_call.xlsx')
+    wb = load_workbook('C:/Users/joema/PycharmProjects/Market-and-Security-Analysis/excel files/put_call.xlsx')
     ws = wb.active
 
     # Get First Empty Row to Append @
@@ -62,7 +62,7 @@ def update_excel_sheet():
     total_pc, equity_pc = download_put_call()
 
     ws[f'A{first_empty_row}'], ws[f'B{first_empty_row}'], ws[f'C{first_empty_row}'] = single_date, total_pc, equity_pc
-    wb.save('C:/Users/joema/PycharmProjects/stocks/excel files/put_call.xlsx')
+    wb.save('C:/Users/joema/PycharmProjects/Market-and-Security-Analysis/excel files/put_call.xlsx')
 
 
 def date_range(start_date, end_date):
@@ -117,3 +117,7 @@ elif get_today and plot_figure:
     plot(timeframe_to_plot_sma, which_option_to_plot)
 else:
     plot(timeframe_to_plot_sma, which_option_to_plot)
+
+
+plot(timeframe_to_plot_sma, 'tpc')
+plot(timeframe_to_plot_sma, 'epc')
