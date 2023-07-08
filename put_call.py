@@ -20,18 +20,18 @@ get_historical = False
 get_today = True
 plot_figure = True
 # 'epc' or 'tpc' | equity or total
-which_option_to_plot = 'tpc'
+which_option_to_plot = 'epc'
 
 timeframe_to_plot_sma = 10
-date_axis_plotting_interval = 15
+date_axis_plotting_interval = 200
 # If you change get_historical to True, change start and end dates. Its non-inclusive at the end date
-start_date = date(2022, 1, 21)
-end_date = date(2022, 2, 2)
+start_date = date(2023, 6, 19)
+end_date = date(2023, 6, 21)
 
 
 def download_put_call():
     # url = 'https://www.cboe.com/us/options/market_statistics/daily/'
-    url = f'https://www.cboe.com/us/options/market_statistics/daily/?dt={single_date}'
+    url = f'https://www.cboe.com/us/options/market_statistics/daily/?dt={single_date}'  # eg. ?dt={2023-06-12}
     s = Service(ChromeDriverManager().install())
     op = webdriver.ChromeOptions()
     op.headless = True
@@ -39,9 +39,10 @@ def download_put_call():
 
     driver.get(url)
     total_put_call = driver.find_element(by=By.XPATH,
-                                         value='/html/body/main/section/div/div[2]/table/tbody/tr[1]/td[2]')
+                                         value='//*[@id="daily-market-statistics"]/div/div[2]/table/tbody/tr[1]/td[2]')
     equity_put_call = driver.find_element(by=By.XPATH,
-                                          value='/html/body/main/section/div/div[2]/table/tbody/tr[4]/td[2]')
+                                          value='//*[@id="daily-market-statistics"]/div/div[2]/table/tbody/tr[4]/td[2]')
+
     return total_put_call.text, equity_put_call.text
 
 
@@ -59,10 +60,14 @@ def update_excel_sheet():
 
     # today = datetime.date.today()
     time.sleep(0.5)
-    total_pc, equity_pc = download_put_call()
-
-    ws[f'A{first_empty_row}'], ws[f'B{first_empty_row}'], ws[f'C{first_empty_row}'] = single_date, total_pc, equity_pc
-    wb.save('C:/Users/joema/PycharmProjects/Market-and-Security-Analysis/excel files/put_call.xlsx')
+    try:
+        total_pc, equity_pc = download_put_call()
+        print(total_pc, equity_pc)
+        ws[f'A{first_empty_row}'], ws[f'B{first_empty_row}'], ws[
+            f'C{first_empty_row}'] = single_date, total_pc, equity_pc
+        wb.save('C:/Users/joema/PycharmProjects/Market-and-Security-Analysis/excel files/put_call.xlsx')
+    except Exception as e:  # todo find out why this is thrown. Are these days the market was closed?
+        print(e)
 
 
 def date_range(start_date, end_date):
@@ -84,12 +89,16 @@ def plot(timeframe, option_type):
         ax.plot(dates, tpc_rolling, label=f'{timeframe}-Day Moving Average', color='purple')
         plt.title('CBOE Total Put/Call Ratio\n', fontsize=21)
         plt.figtext(0.335, 0.89, f'Current Put/Call Ratio: {list(tpc)[-1]}', fontsize=21, color='purple')
+        plt.axhline(0.75, linestyle='--', label='Mean +- 1 STDEV (0.75 and 1.05)')
+        plt.axhline(1.05, linestyle='--')
 
     elif option_type == 'epc':
         ax.plot(dates, epc, label='Equity Put/Call', color='black')
         ax.plot(dates, epc_rolling, label=f'{timeframe}-Day Moving Average', color='purple')
         plt.title('Equity Put/Call Ratio\n', fontsize=21)
         plt.figtext(0.335, 0.89, f'Current Put/Call Ratio: {list(epc)[-1]}', fontsize=21, color='purple')
+        plt.axhline(0.41, linestyle='--', label='Mean +- 1 STDEV (0.41, 0.73)')
+        plt.axhline(0.73, linestyle='--')
 
     ax.xaxis.set_major_locator(matplotlib.dates.DayLocator(interval=date_axis_plotting_interval))
     plt.legend(facecolor='#bebebe', framealpha=0, fontsize=15)

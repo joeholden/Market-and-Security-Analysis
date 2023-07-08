@@ -57,6 +57,7 @@ def download_mclellan_website_data():
     download_link.click()
 
     time.sleep(1)
+    response = requests.get(url)
 
 
 def clean_excel_data():
